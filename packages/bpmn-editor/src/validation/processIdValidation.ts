@@ -17,32 +17,22 @@
  * under the License.
  */
 
-const REGEX = {
-  supportedSingleExtensions: /(\.bpmn|bpmn2|\.dmn|\.pmml)$/i,
-  dmn: /^.*\.dmn$/i,
-  bpmn: /^.*\.(bpmn|bpmn2)$/i,
-  scesim: /^.*\.scesim$/i,
-  pmml: /^.*\.pmml$/i,
-  json: /^.*\.json$/i,
-  yaml: /^.*\.(yml|yaml)$/i,
-  spec: /^.*(\.spec|\.specs|spec|specs)\.(json|yml|yaml)$/i,
-};
+import { BpmnEditorI18n } from "../i18n";
 
-export enum FileTypes {
-  DMN = "dmn",
-  BPMN = "bpmn",
-  BPMN2 = "bpmn2",
-  SCESIM = "scesim",
-  PMML = "pmml",
+export function isProcessIdValid(processId: string | undefined): boolean {
+  if (!processId) {
+    return false;
+  }
+  const trimmed = processId.trim();
+  return trimmed.length > 0 && trimmed.length === processId.length && !processId.includes(" ");
 }
 
-type FileRegexKind = keyof typeof REGEX;
-const matchers: Record<FileRegexKind, (path: string) => boolean> = {} as any;
-for (const key in REGEX) {
-  const kind = key as FileRegexKind;
-  matchers[kind] = (path: string): boolean => REGEX[kind].test(path);
-}
-
-export function isOfKind(kind: FileRegexKind, path: string) {
-  return matchers[kind](path);
+export function getProcessIdErrorMessage(processId: string | undefined, i18n: BpmnEditorI18n): string {
+  if (!processId || processId.trim().length === 0) {
+    return i18n.bpmnDiagramEmptyState.processIdInvalidText;
+  }
+  if (processId.includes(" ")) {
+    return i18n.bpmnDiagramEmptyState.processIdSpacesNotAllowed;
+  }
+  return "";
 }

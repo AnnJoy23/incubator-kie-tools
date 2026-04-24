@@ -17,32 +17,22 @@
  * under the License.
  */
 
-const REGEX = {
-  supportedSingleExtensions: /(\.bpmn|bpmn2|\.dmn|\.pmml)$/i,
-  dmn: /^.*\.dmn$/i,
-  bpmn: /^.*\.(bpmn|bpmn2)$/i,
-  scesim: /^.*\.scesim$/i,
-  pmml: /^.*\.pmml$/i,
-  json: /^.*\.json$/i,
-  yaml: /^.*\.(yml|yaml)$/i,
-  spec: /^.*(\.spec|\.specs|spec|specs)\.(json|yml|yaml)$/i,
-};
+import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
+import { BPMN20__tDefinitions } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
+import { Normalized } from "../normalization/normalize";
 
-export enum FileTypes {
-  DMN = "dmn",
-  BPMN = "bpmn",
-  BPMN2 = "bpmn2",
-  SCESIM = "scesim",
-  PMML = "pmml",
+export const DEFAULT_BPMN_NAMESPACE_PREFIX = "https://kie.apache.org/bpmn/";
+
+export function setTargetNamespace({
+  definitions,
+  namespace,
+}: {
+  definitions: Normalized<BPMN20__tDefinitions>;
+  namespace: string;
+}): void {
+  definitions["@_targetNamespace"] = namespace;
 }
 
-type FileRegexKind = keyof typeof REGEX;
-const matchers: Record<FileRegexKind, (path: string) => boolean> = {} as any;
-for (const key in REGEX) {
-  const kind = key as FileRegexKind;
-  matchers[kind] = (path: string): boolean => REGEX[kind].test(path);
-}
-
-export function isOfKind(kind: FileRegexKind, path: string) {
-  return matchers[kind](path);
+export function regenerateTargetNamespace({ definitions }: { definitions: Normalized<BPMN20__tDefinitions> }): void {
+  setTargetNamespace({ definitions, namespace: `${DEFAULT_BPMN_NAMESPACE_PREFIX}/${generateUuid()}` });
 }

@@ -17,32 +17,23 @@
  * under the License.
  */
 
-const REGEX = {
-  supportedSingleExtensions: /(\.bpmn|bpmn2|\.dmn|\.pmml)$/i,
-  dmn: /^.*\.dmn$/i,
-  bpmn: /^.*\.(bpmn|bpmn2)$/i,
-  scesim: /^.*\.scesim$/i,
-  pmml: /^.*\.pmml$/i,
-  json: /^.*\.json$/i,
-  yaml: /^.*\.(yml|yaml)$/i,
-  spec: /^.*(\.spec|\.specs|spec|specs)\.(json|yml|yaml)$/i,
-};
+import { BPMN20__tDefinitions } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
+import { Normalized } from "../normalization/normalize";
+import { addOrGetProcessAndDiagramElements } from "./addOrGetProcessAndDiagramElements";
+import { regenerateTargetNamespace } from "./setTargetNamespace";
 
-export enum FileTypes {
-  DMN = "dmn",
-  BPMN = "bpmn",
-  BPMN2 = "bpmn2",
-  SCESIM = "scesim",
-  PMML = "pmml",
-}
+export function initializeProcess({
+  definitions,
+  processId,
+}: {
+  definitions: Normalized<BPMN20__tDefinitions>;
+  processId: string;
+}): void {
+  const { process } = addOrGetProcessAndDiagramElements({ definitions });
 
-type FileRegexKind = keyof typeof REGEX;
-const matchers: Record<FileRegexKind, (path: string) => boolean> = {} as any;
-for (const key in REGEX) {
-  const kind = key as FileRegexKind;
-  matchers[kind] = (path: string): boolean => REGEX[kind].test(path);
-}
+  process["@_id"] = processId;
 
-export function isOfKind(kind: FileRegexKind, path: string) {
-  return matchers[kind](path);
+  if (!definitions["@_targetNamespace"]) {
+    regenerateTargetNamespace({ definitions });
+  }
 }
