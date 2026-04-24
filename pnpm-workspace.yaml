@@ -22,4 +22,5 @@ overrides:
   "minimatch@^10": "10.2.1"
   "minimatch@^5": "5.1.9"
   "minimatch@^4": "5.1.9"
+  # Override undici to fix CVE - transitive dependency added from openapi-typescript@bf595a04658b1961bff21b4af4e42b4680db74df
   "undici": "6.24.0"
